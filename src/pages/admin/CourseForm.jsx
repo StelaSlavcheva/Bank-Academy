@@ -16,12 +16,13 @@ export default function CourseForm() {
         duration: '',
         description: '',
         mandatory: false,
-        mode: 'flexible', // 'flexible' or 'compliance'
+        mode: 'flexible',
         settings: {
             sequentialEnforcement: false,
             resetOnFailure: false,
             maxQuizAttempts: 3
-        }
+        },
+        thumbnail: ''
     });
 
     const [modules, setModules] = useState([]);
@@ -60,7 +61,8 @@ export default function CourseForm() {
                                 sequentialEnforcement: false,
                                 resetOnFailure: false,
                                 maxQuizAttempts: 3
-                            }
+                            },
+                            thumbnail: course.thumbnail || ''
                         });
                         setModules(course.modules || []);
                     }
@@ -86,6 +88,28 @@ export default function CourseForm() {
             settings: { ...prev.settings, [field]: value }
         }));
     };
+
+    const generateThumbnail = (category) => {
+        const presets = {
+            'Плащания': 'https://images.unsplash.com/photo-1556742049-02e73f8008ee?w=600&q=80',
+            'Кредити': 'https://images.unsplash.com/photo-1554224155-9736b5cb9336?w=600&q=80',
+            'Сметки и депозити': 'https://images.unsplash.com/photo-1550565118-3a14e8d0386f?w=600&q=80',
+            'GDPR': 'https://images.unsplash.com/photo-1516321318423-f06f85e504b3?w=600&q=80',
+            'Карти': 'https://images.unsplash.com/photo-1556742111-a301076d9d18?w=600&q=80',
+            'Сигурност': 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80',
+            'AML': 'https://images.unsplash.com/photo-1450101496193-db365ec3c224?w=600&q=80',
+            'Дигитализация': 'https://images.unsplash.com/photo-1460925895917-afdab827c52f?w=600&q=80'
+        };
+        const defaultImg = 'https://images.unsplash.com/photo-1512428559083-a40c16d1957c?w=600&q=80';
+        const newUrl = presets[category] || defaultImg;
+        handleInputChange('thumbnail', newUrl);
+    };
+
+    useEffect(() => {
+        if (!isEditMode && courseData.category && !courseData.thumbnail) {
+            generateThumbnail(courseData.category);
+        }
+    }, [courseData.category, isEditMode]);
 
     const addModule = (type) => {
         const newModule = {
@@ -446,6 +470,96 @@ export default function CourseForm() {
                                 </div>
                             </div>
                         )}
+                    </div>
+
+                    {/* Thumbnail / Cover Image */}
+                    <div style={{ backgroundColor: 'white', borderRadius: '12px', border: '1px solid #E5E7EB', padding: '1.5rem' }}>
+                        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
+                            <h2 style={{ fontSize: '1.25rem', fontWeight: '600', margin: 0 }}>Корица на обучението</h2>
+                            <button
+                                type="button"
+                                onClick={() => generateThumbnail(courseData.category)}
+                                style={{
+                                    background: 'none', border: 'none', color: '#2563EB', fontWeight: '600',
+                                    fontSize: '0.85rem', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px'
+                                }}
+                            >
+                                <Loader size={14} /> Генерирай автоматично
+                            </button>
+                        </div>
+
+                        <div style={{ display: 'grid', gridTemplateColumns: '300px 1fr', gap: '2rem' }}>
+                            <div style={{
+                                width: '300px', height: '180px', borderRadius: '12px', overflow: 'hidden',
+                                backgroundColor: '#F3F4F6', border: '1px solid #E5E7EB', display: 'flex',
+                                alignItems: 'center', justifyContent: 'center'
+                            }}>
+                                {courseData.thumbnail ? (
+                                    <img
+                                        src={courseData.thumbnail}
+                                        alt="Course cover"
+                                        style={{ width: '100%', height: '100%', objectFit: 'cover' }}
+                                    />
+                                ) : (
+                                    <div style={{ textAlign: 'center', color: '#9CA3AF' }}>
+                                        <Upload size={32} style={{ marginBottom: '8px' }} />
+                                        <div style={{ fontSize: '0.8rem' }}>Няма изображение</div>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div style={{ display: 'grid', gap: '1rem' }}>
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.9rem', fontWeight: '500', marginBottom: '0.5rem', color: '#374151' }}>
+                                        URL адрес на изображението
+                                    </label>
+                                    <div style={{ display: 'flex', gap: '8px' }}>
+                                        <input
+                                            type="text"
+                                            value={courseData.thumbnail}
+                                            onChange={(e) => handleInputChange('thumbnail', e.target.value)}
+                                            placeholder="https://images.unsplash.com/..."
+                                            style={{
+                                                flex: 1, padding: '10px 12px', borderRadius: '8px',
+                                                border: '1px solid #D1D5DB', fontSize: '0.95rem'
+                                            }}
+                                        />
+                                    </div>
+                                    <p style={{ fontSize: '0.75rem', color: '#6B7280', marginTop: '0.5rem' }}>
+                                        Можете да поставите линк към всяко безплатно изображение (Unsplash, Pexels и др.)
+                                    </p>
+                                </div>
+
+                                <div>
+                                    <label style={{ display: 'block', fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.75rem', color: '#4B5563' }}>
+                                        Бързи предложения:
+                                    </label>
+                                    <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                                        {[
+                                            { label: 'Финанси', url: 'https://images.unsplash.com/photo-1554224155-9736b5cb9336?w=600&q=80' },
+                                            { label: 'Технологии', url: 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=600&q=80' },
+                                            { label: 'Сигурност', url: 'https://images.unsplash.com/photo-1563986768609-322da13575f3?w=600&q=80' },
+                                            { label: 'Офис', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?w=600&q=80' },
+                                            { label: 'Екип', url: 'https://images.unsplash.com/photo-1522071820081-009f0129c71c?w=600&q=80' }
+                                        ].map((preset, i) => (
+                                            <button
+                                                key={i}
+                                                type="button"
+                                                onClick={() => handleInputChange('thumbnail', preset.url)}
+                                                style={{
+                                                    padding: '6px 12px', borderRadius: '20px', border: '1px solid #E5E7EB',
+                                                    backgroundColor: courseData.thumbnail === preset.url ? '#EFF6FF' : 'white',
+                                                    color: courseData.thumbnail === preset.url ? '#2563EB' : '#4B5563',
+                                                    fontSize: '0.8rem', fontWeight: '500', cursor: 'pointer', transition: 'all 0.2s'
+                                                }}
+                                            >
+                                                {preset.label}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </div>
 
